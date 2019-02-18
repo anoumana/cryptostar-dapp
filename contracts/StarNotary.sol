@@ -23,6 +23,7 @@ contract StarNotary is ERC721 {
 
     struct Star {
         string name;
+        bool exists;
     }
 
     mapping(uint256 => Star) public tokenIdToStarInfo;
@@ -36,16 +37,37 @@ contract StarNotary is ERC721 {
         return name;  // returns the star name
     }
 
+    // Exchange Stars function
+    function exchangeStars(uint256 _tokenId1, uint256 _tokenId2) public {
+        require(tokenIdToStarInfo[_tokenId1].exists);
+        require(tokenIdToStarInfo[_tokenId2].exists);
+
+        Star memory star1 = tokenIdToStarInfo[_tokenId1];
+        Star memory star2 = tokenIdToStarInfo[_tokenId2];
+
+        tokenIdToStarInfo[_tokenId1] = star2;
+        tokenIdToStarInfo[_tokenId2] = star1;
+    }
+
+    // transfer a star from the address of the caller to the to address given in the function
+    function transferStar(address _to1, uint256 _tokenId) public {
+        require(_to1 != address(0));
+        require(ownerOf(_tokenId) == msg.sender, "You can't transfer the star you dont own");
+
+        safeTransferFrom(msg.sender, _to1, _tokenId);
+    }
+
+
     // Create Star using the Struct
     function createStar(string memory _name, uint256 _tokenId) public { // Passing the name and tokenId as a parameters
-        Star memory newStar = Star(_name); // Star is an struct so we are creating a new Star
+        Star memory newStar = Star(_name, true); // Star is an struct so we are creating a new Star
         tokenIdToStarInfo[_tokenId] = newStar; // Creating in memory the Star -> tokenId mapping
         _mint(msg.sender, _tokenId); // _mint assign the the star with _tokenId to the sender address (ownership)
     }
 
-    // Putting an Star for sale (Adding the star tokenid into the mapping starsForSale, first verify that the sender is the owner)
+    // Putting a Star for sale (Adding the star tokenid into the mapping starsForSale, first verify that the sender is the owner)
     function putStarUpForSale(uint256 _tokenId, uint256 _price) public {
-        require(ownerOf(_tokenId) == msg.sender, "You can't sale the Star you don't owned");
+        require(ownerOf(_tokenId) == msg.sender, "You can't sell the Star you don't own");
         starsForSale[_tokenId] = _price;
     }
 
