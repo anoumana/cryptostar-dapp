@@ -22,10 +22,6 @@ const App = {
       const accounts = await web3.eth.getAccounts();
       this.account = accounts[0];
       console.log("account 0 :" + accounts[0]);
-      console.log("accounts 1:" + accounts[1]);
-      console.log("accounts 2:" + accounts[2]);
-      console.log("accounts 3:" + accounts[3]);
-      console.log("accounts 4:" + accounts[4]);
 
     } catch (error) {
       console.error("Could not connect to contract or chain.");
@@ -43,6 +39,18 @@ const App = {
     const id = document.getElementById("starId").value;
     await createStar(name, id).send({from: this.account});
     App.setStatus("New Star Owner is " + this.account + ".");
+  },
+
+  setLookupStarName: function(message) {
+    const status = document.getElementById("lookUpStarName");
+    status.innerHTML = message;
+  },
+
+  lookupStar: async function() {
+    const { lookUptokenIdToStarInfo  } = this.meta.methods;
+    const id = document.getElementById("lookupStarId").value;
+    let starName = await lookUptokenIdToStarInfo(id).call();
+    App.setLookupStarName("Star name is " + starName);
   }
 
 };
